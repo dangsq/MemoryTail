@@ -377,6 +377,7 @@ export class AppleRenderer {
     const w = p.leafWidth
 
     // Leaf shape in XY plane: length along +Y, width along ±X
+    // Base at origin (0,0), tip at (0, len)
     const shape = new THREE.Shape()
     shape.moveTo(0, 0)
     shape.bezierCurveTo(w * 0.55, len * 0.2, w * 0.75, len * 0.55, 0, len)
@@ -387,7 +388,7 @@ export class AppleRenderer {
       bevelEnabled: false,
       curveSegments: 16,
     })
-    geo.center()
+    // Do NOT center — we want base at origin, tip at +Y
     geo.computeVertexNormals()
 
     const mesh = new THREE.Mesh(
@@ -399,20 +400,19 @@ export class AppleRenderer {
       }),
     )
 
-    // ── Position at top dimple rim ──
-    const topRimY = p.height / 2 - p.topDepth
-    const topRimR = p.topRadius
-    mesh.position.set(0, topRimY, topRimR)
+    // ── Position: base at top dimple tip ──
+    // The dimple tip is the deepest point of the top dimple,
+    // on the center axis (r=0), at y = height/2 - topDepth
+    const dimpleTipY = p.height / 2 - p.topDepth
+    mesh.position.set(0, dimpleTipY, 0)
 
     // ── Orientation ──
-    // Step 1: Rz(-π/2) — leaf from vertical (Y) to flat (XZ), length along +X
-    // Step 2: Ry(azimuth) — align +X with outward direction (+Z)
-    // Step 3: Rx(tilt) — lift the leaf tip upward
-    //   tiltAngle = π/2 - leafAngle
-    //   leafAngle=π/2 → tilt=0 (straight up)
-    //   leafAngle=π/4 → tilt=π/4 (45° from vertical)
-    const tiltAngle = Math.PI / 2 - p.leafAngle
-    mesh.rotation.set(tiltAngle, Math.PI / 2, -Math.PI / 2)
+    // Leaf shape already has length along +Y (upward).
+    // When leafAngle = π/2 → straight up → no rotation needed.
+    // When leafAngle < π/2 → tilt away from vertical by (π/2 - leafAngle)
+    // Rotate around Z axis to tilt the leaf in the X direction.
+    const tiltFromVertical = Math.PI / 2 - p.leafAngle
+    mesh.rotation.z = tiltFromVertical
 
     return mesh
   }
