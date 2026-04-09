@@ -32,37 +32,6 @@ export class AppleRenderer {
   // Camera animation state
   private cameraTargetPos = new THREE.Vector3(0, 0.8, 2.8)
   private cameraTargetLookAt = new THREE.Vector3(0, 0, 0)
-  private cameraCurrentPos = new THREE.Vector3(0, 0.8, 2.8)
-  private cameraCurrentLookAt = new THREE.Vector3(0, 0, 0)
-
-  // Toon gradient texture for cartoon shading
-  private createToonGradient(steps: number = 4): THREE.Texture {
-    const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 1
-    const ctx = canvas.getContext('2d')!
-    
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0)
-    const colorStops = [
-      { pos: 0.0, color: '#1a1a1a' },
-      { pos: 0.15, color: '#4a4a4a' },
-      { pos: 0.4, color: '#8a8a8a' },
-      { pos: 0.7, color: '#c8c8c8' },
-      { pos: 1.0, color: '#ffffff' },
-    ]
-    
-    colorStops.forEach(stop => {
-      gradient.addColorStop(stop.pos, stop.color)
-    })
-    
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.minFilter = THREE.LinearFilter
-    texture.magFilter = THREE.LinearFilter
-    return texture
-  }
 
   constructor(container: HTMLElement) {
     this.container = container
@@ -424,83 +393,26 @@ export class AppleRenderer {
     const mesh = new THREE.Mesh(
       geo,
       new THREE.MeshStandardMaterial({
-        color: '#2ecc71',
-        roughness: 0.5,
-        metalness: 0.0,
+        color: '#5e8d38',
+        roughness: 0.65,
         side: THREE.DoubleSide,
       }),
     )
 
-    // ── Step 1: Calculate the tip point of the apple dimple ──
-    // The top dimple tip is the deepest point of the dimple (p5 point)
-    // In the profile, this is the point with v5: radius = 0, z = height/2 - topDepth
-    const tipPosition = new THREE.Vector3(0, p.height / 2 - p.topDepth, 0)
+    // ── Position at top dimple rim ──
+    const topRimY = p.height / 2 - p.topDepth
+    const topRimR = p.topRadius
+    mesh.position.set(0, topRimY, topRimR)
 
-    // ── Step 2: Calculate the upward direction at the tip ──
-    // At the tip (center of the dimple), the normal points straight up (+Y direction)
-    // We also want the leaf to grow slightly outward
-    const upDirection = new THREE.Vector3(0, 1, 0)  // 向上方向
-    const outDirection = new THREE.Vector3(0, 0, 1)  // 向外方向（+Z方向）
-
-    // ── Step 3: Calculate leaf base offset ──
-    // Leaf is centered by geo.center(), so we need to offset it
-    // The leaf length is 'len', so the base is at -len/2 from center
-    // After rotation, we need to account for this offset
-    const leafHalfLength = len / 2
-
-    // ── Step 4: Position the leaf ──
-    // Place the leaf so its base aligns with the tip
-    // We'll position the center first, then adjust for the rotation
-    mesh.position.copy(tipPosition)
-
-    // ── Step 5: Orient the leaf ──
-    // We want the leaf to grow upward and slightly outward
-    // The leafAngle parameter controls the angle between the leaf and vertical
-    
-    // Create a rotation that:
-    // 1. Points the leaf upward (along +Y)
-    // 2. Tilts it by leafAngle from vertical
-    // 3. Points it outward (along +Z)
-    
-    // Step 5a: Calculate the direction the leaf should grow
-    // Interpolate between up and out based on leafAngle
-    // leafAngle = π/2 → straight up (垂直向上)
-    // leafAngle = π/4 → 45° from vertical (45度倾斜)
-    // leafAngle = 0 → horizontal (水平向外)
-    const leafAngle = p.leafAngle
-    const cosAngle = Math.cos(leafAngle)
-    const sinAngle = Math.sin(leafAngle)
-    
-    // Direction: interpolate between horizontal (angle=0) and vertical (angle=π/2)
-    const growDirection = new THREE.Vector3(
-      0,  // X: no sideways
-      sinAngle,  // Y: upward component - 大角度时向上分量大
-      cosAngle   // Z: outward component - 大角度时向外分量小
-    ).normalize()
-
-    // Step 5b: Create rotation to align leaf with growDirection
-    // The leaf originally points along +Y (after centering)
-    // We need to rotate it to point along growDirection
-    
-    // Use quaternion to create the rotation
-    const quaternion = new THREE.Quaternion()
-    quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), growDirection)
-    
-    // Step 5c: Rotate 90 degrees around the leaf's longest axis (growDirection)
-    // This rotates the leaf around its length axis
-    const rotationAroundAxis = new THREE.Quaternion()
-    rotationAroundAxis.setFromAxisAngle(growDirection, Math.PI / 2)
-    
-    // Combine the two rotations: first align with growDirection, then rotate around it
-    quaternion.multiply(rotationAroundAxis)
-    
-    mesh.quaternion.copy(quaternion)
-
-    // Step 5d: Adjust position to align base with tip
-    // After rotation, the leaf center is still at tipPosition
-    // But we want the base at tipPosition
-    // So we need to move the leaf by half its length along the growDirection
-    mesh.position.add(growDirection.clone().multiplyScalar(leafHalfLength))
+    // ── Orientation ──
+    // Step 1: Rz(-π/2) — leaf from vertical (Y) to flat (XZ), length along +X
+    // Step 2: Ry(azimuth) — align +X with outward direction (+Z)
+    // Step 3: Rx(tilt) — lift the leaf tip upward
+    //   tiltAngle = π/2 - leafAngle
+    //   leafAngle=π/2 → tilt=0 (straight up)
+    //   leafAngle=π/4 → tilt=π/4 (45° from vertical)
+    const tiltAngle = Math.PI / 2 - p.leafAngle
+    mesh.rotation.set(tiltAngle, Math.PI / 2, -Math.PI / 2)
 
     return mesh
   }
