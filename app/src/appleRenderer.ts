@@ -18,7 +18,7 @@ import type { AppleParams } from './types'
    ═══════════════════════════════════════════════════ */
 
 export class AppleRenderer {
-  private readonly scene: THREE.Scene
+  public readonly scene: THREE.Scene
   private readonly camera: THREE.PerspectiveCamera
   private readonly renderer: THREE.WebGLRenderer
   private readonly controls: OrbitControls
@@ -37,32 +37,33 @@ export class AppleRenderer {
     this.container = container
 
     this.scene = new THREE.Scene()
-    this.scene.background = new THREE.Color('#34495e')
-    this.scene.fog = new THREE.Fog('#34495e', 4, 12)
+    // Black background for theatrical stage
+    this.scene.background = new THREE.Color('#000000')
+    this.scene.fog = new THREE.Fog('#000000', 3, 8)
 
     this.camera = new THREE.PerspectiveCamera(36, 1, 0.01, 50)
-    this.camera.position.set(0, 0.8, 2.8)
+    this.camera.position.set(0.5, 0.5, 2.0)
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.renderer.localClippingEnabled = true
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
     this.container.appendChild(this.renderer.domElement)
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.enabled = true  // Explicitly enable controls
+    this.controls.enabled = true
     this.controls.enableDamping = true
     this.controls.dampingFactor = 0.08
-    this.controls.target.set(0, 0.0, 0)
+    this.controls.target.set(-0.2, 0.2, 0)
     this.controls.minDistance = 0.5
     this.controls.maxDistance = 6
     
-    // Enable all interaction modes
     this.controls.enableRotate = true
     this.controls.enableZoom = true
     this.controls.enablePan = true
     
-    // Set rotation speed
     this.controls.rotateSpeed = 1.0
     this.controls.zoomSpeed = 1.0
     this.controls.panSpeed = 1.0
@@ -70,34 +71,52 @@ export class AppleRenderer {
     this.scene.add(this.stage)
     this.stage.add(this.appleGroup)
 
-    // floor
+    // Theatrical stage floor with spotlight effect
     const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(3, 64),
+      new THREE.CircleGeometry(2, 64),
       new THREE.MeshStandardMaterial({
-        color: '#5a6c7d',
-        roughness: 0.8,
-        metalness: 0.1,
-        transparent: true,
-        opacity: 0.6,
+        color: '#1a1a1a',
+        roughness: 0.9,
+        metalness: 0.0,
       }),
     )
     floor.rotation.x = -Math.PI / 2
-    floor.position.y = -0.7
+    floor.position.y = -0.5
+    floor.receiveShadow = true
     this.stage.add(floor)
 
-    // lights - enhanced for natural materials
-    this.scene.add(new THREE.HemisphereLight('#fff8e7', '#5a4030', 1.5))
-    const key = new THREE.DirectionalLight('#fffbf5', 3.0)
-    key.position.set(2, 2.5, 2)
-    this.scene.add(key)
-    const rim = new THREE.DirectionalLight('#ffd9c4', 1.5)
-    rim.position.set(-2, 1, -2)
-    this.scene.add(rim)
-    const fill = new THREE.DirectionalLight('#b08868', 0.8)
-    fill.position.set(0, -1.5, 1)
-    this.scene.add(fill)
-    // Strong ambient light to prevent black rendering
-    this.scene.add(new THREE.AmbientLight('#ffffff', 0.6))
+    // Theatrical lighting setup
+    // Main spotlight (warm golden)
+    const spotlight = new THREE.SpotLight('#FFD700', 8.0)
+    spotlight.position.set(0, 3, 1)
+    spotlight.angle = Math.PI / 6
+    spotlight.penumbra = 0.5
+    spotlight.decay = 2
+    spotlight.distance = 10
+    spotlight.castShadow = true
+    spotlight.shadow.mapSize.width = 1024
+    spotlight.shadow.mapSize.height = 1024
+    this.scene.add(spotlight)
+    spotlight.target.position.set(0, 0, 0)
+    this.scene.add(spotlight.target)
+
+    // Rim light (cool blue-white)
+    const rimLight = new THREE.SpotLight('#87CEEB', 3.0)
+    rimLight.position.set(-2, 2, -1)
+    rimLight.angle = Math.PI / 4
+    rimLight.penumbra = 0.8
+    rimLight.decay = 2
+    this.scene.add(rimLight)
+    rimLight.target.position.set(0, 0, 0)
+    this.scene.add(rimLight.target)
+
+    // Fill light (soft warm)
+    const fillLight = new THREE.PointLight('#FFA500', 1.5, 5)
+    fillLight.position.set(1.5, 0.5, 1.5)
+    this.scene.add(fillLight)
+
+    // Subtle ambient for visibility
+    this.scene.add(new THREE.AmbientLight('#ffffff', 0.2))
 
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(container)
@@ -543,5 +562,15 @@ export class AppleRenderer {
         else mat.dispose()
       }
     }
+  }
+
+  /* ── controls ── */
+
+  enableControls() {
+    this.controls.enabled = true
+  }
+
+  disableControls() {
+    this.controls.enabled = false
   }
 }

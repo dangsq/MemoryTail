@@ -1,10 +1,12 @@
 import GUI from 'lil-gui'
 import './style.css'
+import * as THREE from 'three'
 import { AppleRenderer } from './appleRenderer'
-import { clampParams, mergeParams, paramRanges } from './params'
-import { createRandomAppleParams } from './random'
+import { TailRenderer } from './tailRenderer'
+import { RobotDogRenderer } from './robotDogRenderer'
+import { mergeTailParams, tailParamRanges, clampTailParams } from './params'
 import { storyPages } from './story'
-import type { AppleParams } from './types'
+import type { TailParams } from './types'
 
 /* ═══════════════════════════════════════════════════
    DOM scaffold
@@ -17,46 +19,45 @@ const dotButtons = storyPages.map(
 )
 
 app.innerHTML = `
-  <div class="shell">
-    <!-- Left: narrative -->
-    <section class="narrative-panel">
-      <header class="narrative-header">
-        <span class="project-label">Apple Grammar</span>
-        <span class="page-counter" id="page-counter">01 / ${String(storyPages.length).padStart(2, '0')}</span>
-      </header>
+  <!-- Background Image -->
+  <div class="background-image" id="bg-image"></div>
+  
+  <!-- Black Transition Overlay -->
+  <div class="black-overlay" id="black-overlay"></div>
+  
+  <!-- Content Layer -->
+  <div class="content-layer">
+    <header class="story-header">
+      <span class="project-label">Memory Tail</span>
+      <span class="page-counter" id="page-counter">00 / ${String(storyPages.length - 1).padStart(2, '0')}</span>
+    </header>
 
-      <div class="story-content">
-        <div class="story-image" id="story-image">
-          <div class="image-inner" id="image-inner"></div>
-        </div>
-        <span class="chapter-label" id="chapter-label"></span>
-        <h1 class="page-title" id="page-title"></h1>
-        <p class="page-text" id="page-text"></p>
-        <span class="mode-badge" id="mode-badge"></span>
+    <div class="story-content" id="story-content">
+      <h1 class="page-title" id="page-title"></h1>
+      <p class="page-text" id="page-text"></p>
+    </div>
+
+    <footer class="story-footer">
+      <div class="dot-nav" id="dot-nav">
+        ${dotButtons.join('')}
       </div>
-
-      <footer class="narrative-footer">
-        <div class="dot-nav" id="dot-nav">
-          ${dotButtons.join('')}
-        </div>
-        <div class="page-nav">
-          <button class="nav-btn" id="prev-btn" aria-label="Previous page">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button class="nav-btn" id="next-btn" aria-label="Next page">
-            <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-          </button>
-        </div>
-      </footer>
-    </section>
-
-    <!-- Right: 3D -->
-    <section class="canvas-panel">
-      <div class="canvas-wrap" id="canvas-wrap"></div>
-      <div class="gui-host" id="gui-host"></div>
-      <div class="keyboard-hint" id="keyboard-hint">Press &larr; &rarr; to navigate</div>
-    </section>
+      <div class="page-nav">
+        <button class="nav-btn" id="prev-btn" aria-label="Previous page">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="nav-btn" id="next-btn" aria-label="Next page">
+          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+      </div>
+    </footer>
   </div>
+
+  <!-- 3D Canvas (for last page) -->
+  <div class="canvas-wrap" id="canvas-wrap"></div>
+  <div class="gui-host" id="gui-host"></div>
+  
+  <!-- Keyboard Hint -->
+  <div class="keyboard-hint" id="keyboard-hint">Press ← → to navigate</div>
   
   <!-- Copyright Footer -->
   <footer class="copyright-footer">
@@ -68,17 +69,16 @@ app.innerHTML = `
    Element references
    ═══════════════════════════════════════════════════ */
 const el = {
+  bgImage: document.getElementById('bg-image') as HTMLDivElement,
+  blackOverlay: document.getElementById('black-overlay') as HTMLDivElement,
   counter: document.getElementById('page-counter')!,
-  chapterLabel: document.getElementById('chapter-label')!,
   title: document.getElementById('page-title')!,
   text: document.getElementById('page-text')!,
-  modeBadge: document.getElementById('mode-badge')!,
-  storyImage: document.getElementById('story-image')!,
-  imageInner: document.getElementById('image-inner')!,
+  storyContent: document.getElementById('story-content') as HTMLDivElement,
   prevBtn: document.getElementById('prev-btn') as HTMLButtonElement,
   nextBtn: document.getElementById('next-btn') as HTMLButtonElement,
   dotNav: document.getElementById('dot-nav')!,
-  canvasWrap: document.getElementById('canvas-wrap')!,
+  canvasWrap: document.getElementById('canvas-wrap') as HTMLDivElement,
   guiHost: document.getElementById('gui-host')!,
   keyboardHint: document.getElementById('keyboard-hint')!,
 }
@@ -89,118 +89,44 @@ const dots = Array.from(el.dotNav.querySelectorAll<HTMLButtonElement>('.dot'))
    Renderer
    ═══════════════════════════════════════════════════ */
 const renderer = new AppleRenderer(el.canvasWrap)
+const robotDogRenderer = new RobotDogRenderer(renderer.scene)
+const tailRenderer = new TailRenderer(renderer.scene)
 
 /* ═══════════════════════════════════════════════════
    State
    ═══════════════════════════════════════════════════ */
 let pageIndex = 0
 let gui: GUI | null = null
-let randomPageParams = createRandomAppleParams()
-let editorParams: AppleParams = mergeParams({
-  ...storyPages.find((p) => p.id === 'vessel')?.params,
-})
+let editorTailParams: TailParams = mergeTailParams()
 let isTransitioning = false
 
 /* ═══════════════════════════════════════════════════
-   GUI (free edit mode)
+   Page transition with black fade
    ═══════════════════════════════════════════════════ */
-function destroyGui() {
-  if (gui) {
-    gui.destroy()
-    gui = null
-  }
-  el.guiHost.innerHTML = ''
-}
+function goToPage(newIndex: number) {
+  if (isTransitioning) return
+  if (newIndex < 0 || newIndex >= storyPages.length) return
+  if (newIndex === pageIndex) return
 
-function setupGui() {
-  destroyGui()
-  gui = new GUI({ container: el.guiHost, title: '参数调节' })
-  const params = editorParams
+  isTransitioning = true
 
-  const addSlider = (folder: GUI, key: keyof AppleParams, label: string, step = 0.001) => {
-    const range = paramRanges[key]
-    if (!range) return
-    folder
-      .add(params, key, range[0], range[1], step)
-      .name(label)
-      .onChange(() => {
-        editorParams = clampParams({ ...params })
-        renderer.update(editorParams)
-      })
-  }
+  // Fade out content
+  el.storyContent.classList.add('fade-out')
 
-  const form = gui.addFolder('核心形态')
-  addSlider(form, 'height', '高度', 0.01)
-  addSlider(form, 'width', '宽度', 0.01)
-  addSlider(form, 'maxWidthHeight', '最宽处高度', 0.01)
-  addSlider(form, 'cubicRatio', '曲线张力', 0.01)
+  // Fade to black
+  el.blackOverlay.classList.add('active')
 
-  const dimples = gui.addFolder('凹陷')
-  addSlider(dimples, 'bottomRadius', '底部开口半径', 0.005)
-  addSlider(dimples, 'bottomDepth', '底部深度', 0.005)
-  addSlider(dimples, 'topRadius', '顶部开口半径', 0.005)
-  addSlider(dimples, 'topDepth', '顶部深度', 0.005)
+  setTimeout(() => {
+    pageIndex = newIndex
+    renderPage()
 
-  const shell = gui.addFolder('壳体')
-  addSlider(shell, 'shellThickness', '壳厚度', 0.005)
-
-  const leaf = gui.addFolder('叶子')
-  leaf.add(params, 'leafEnabled').name('显示叶子').onChange(() => {
-    editorParams = clampParams({ ...params })
-    renderer.update(editorParams)
-  })
-  addSlider(leaf, 'leafLength', '叶片长度', 0.005)
-  addSlider(leaf, 'leafWidth', '叶片宽度', 0.005)
-  addSlider(leaf, 'leafAngle', '叶片角度', 0.01)
-
-  const bite = gui.addFolder('咬痕')
-  bite.add(params, 'biteEnabled').name('显示咬痕').onChange(() => {
-    editorParams = clampParams({ ...params })
-    renderer.update(editorParams)
-  })
-  addSlider(bite, 'biteU', '经度 U', 0.01)
-  addSlider(bite, 'biteV', '纬度 V', 0.01)
-  addSlider(bite, 'biteRadius', '咬痕半径', 0.01)
-
-  const presentation = gui.addFolder('展示')
-  addSlider(presentation, 'rotationY', 'Y轴旋转', 0.01)
-
-  gui.add(
-    {
-      '随机生成': () => {
-        editorParams = createRandomAppleParams()
-        destroyGui()
-        setupGui()
-        renderPage()
-      },
-    },
-    '随机生成',
-  )
-}
-
-/* ═══════════════════════════════════════════════════
-   Resolve params for current page
-   ═══════════════════════════════════════════════════ */
-function resolvePageParams(): AppleParams {
-  const page = storyPages[pageIndex]
-  if (page.freeEdit) return editorParams
-  if (page.random) return randomPageParams
-  return mergeParams(page.params)
-}
-
-/* ═══════════════════════════════════════════════════
-   Text transition helpers
-   ═══════════════════════════════════════════════════ */
-const animatableEls = () => [el.storyImage, el.chapterLabel, el.title, el.text, el.modeBadge]
-
-function hideText() {
-  animatableEls().forEach((e) => e.classList.remove('visible'))
-}
-
-function showText() {
-  animatableEls().forEach((e, i) => {
-    setTimeout(() => e.classList.add('visible'), i * 60)
-  })
+    // Fade from black
+    setTimeout(() => {
+      el.blackOverlay.classList.remove('active')
+      el.storyContent.classList.remove('fade-out')
+      isTransitioning = false
+    }, 100)
+  }, 600)
 }
 
 /* ═══════════════════════════════════════════════════
@@ -208,103 +134,145 @@ function showText() {
    ═══════════════════════════════════════════════════ */
 function renderPage() {
   const page = storyPages[pageIndex]
-  const params = resolvePageParams()
+  
+  // Update counter
+  el.counter.textContent = `${String(pageIndex).padStart(2, '0')} / ${String(storyPages.length - 1).padStart(2, '0')}`
 
-  // counter
-  el.counter.textContent = `${String(pageIndex + 1).padStart(2, '0')} / ${String(storyPages.length).padStart(2, '0')}`
+  // Update dots
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === pageIndex)
+  })
 
-  // chapter label
-  el.chapterLabel.textContent = page.freeEdit
-    ? 'Playground'
-    : page.random
-      ? 'Variation'
-      : `Chapter ${page.label}`
-
-  // title & text
-  el.title.innerHTML = page.title.replace(/\n/g, '<br>')
-  el.text.innerHTML = page.text.replace(/\n/g, '<br>')
-
-  // mode badge
-  el.modeBadge.textContent = page.freeEdit
-    ? 'Free Edit'
-    : page.random
-      ? 'Random'
-      : ''
-
-  // dots
-  dots.forEach((d, i) => d.classList.toggle('active', i === pageIndex))
-
-  // buttons
+  // Update nav buttons
   el.prevBtn.disabled = pageIndex === 0
   el.nextBtn.disabled = pageIndex === storyPages.length - 1
 
-  // keyboard hint
-  el.keyboardHint.classList.toggle('visible', pageIndex === 0)
-
-  // story image
-  el.storyImage.classList.remove('visible')
+  // Update background image
   if (page.imageUrl) {
-    el.imageInner.style.backgroundImage = `url(${page.imageUrl})`
-    el.imageInner.style.backgroundSize = 'cover'
-    el.imageInner.style.backgroundPosition = 'center'
-    el.imageInner.setAttribute('data-shape', page.imageShape || '')
-    setTimeout(() => el.storyImage.classList.add('visible'), 0)
-  } else if (page.imageGradient) {
-    el.imageInner.style.background = page.imageGradient
-    el.imageInner.setAttribute('data-shape', page.imageShape || '')
-    setTimeout(() => el.storyImage.classList.add('visible'), 0)
+    el.bgImage.style.backgroundImage = `url('${page.imageUrl}')`
+    
+    // Cover page (page 0) should be darker
+    if (pageIndex === 0) {
+      el.bgImage.classList.add('cover-mode')
+    } else {
+      el.bgImage.classList.remove('cover-mode')
+    }
   }
 
-  // camera
-  // Removed fixed camera - all pages now have free camera control
+  // Update text content
+  el.title.textContent = page.title
+  el.text.textContent = page.text
 
-  // renderer
-  renderer.setInteractive(true)  // Always enable interactive mode for free camera control
-  renderer.update(params)
-
-  // gui
-  if (page.freeEdit) {
-    setupGui()
+  // Handle last page (free edit mode)
+  const isLastPage = pageIndex === storyPages.length - 1
+  
+  if (isLastPage) {
+    // Show canvas and GUI
+    el.canvasWrap.classList.add('visible')
+    el.guiHost.classList.add('visible')
+    el.keyboardHint.style.display = 'none'
+    
+    // Hide background image and text content
+    el.bgImage.style.opacity = '0'
+    el.storyContent.style.display = 'none'
+    
+    // Enable orbit controls
+    renderer.enableControls()
+    
+    // Build GUI if not exists
+    if (!gui) {
+      buildGUI()
+    }
+    
+    // Show tail instead of apple
+    renderer.scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.visible = false
+      }
+    })
+    
+    // Attach tail to robot dog
+    const attachPoint = robotDogRenderer.getTailAttachmentPoint()
+    tailRenderer.setAttachmentPoint(attachPoint)
+    tailRenderer.update(editorTailParams)
   } else {
-    destroyGui()
+    // Hide canvas and GUI
+    el.canvasWrap.classList.remove('visible')
+    el.guiHost.classList.remove('visible')
+    el.keyboardHint.style.display = 'block'
+    
+    // Show background image and text content
+    el.bgImage.style.opacity = '1'
+    el.storyContent.style.display = 'flex'
+    
+    // Disable orbit controls
+    renderer.disableControls()
   }
+}
 
-  // trigger text appear
-  showText()
+/* ═══════════════════════════════════════════════════
+   Build GUI for last page
+   ═══════════════════════════════════════════════════ */
+function buildGUI() {
+  gui = new GUI({ container: el.guiHost, title: 'Tail Parameters' })
+
+  // Memory Parameters
+  const memoryFolder = gui.addFolder('Memory Parameters')
+  memoryFolder.add(editorTailParams, 'tailLength', ...tailParamRanges.tailLength!).name('Length (reaches my hand)').onChange(() => updateTailFromGUI())
+  memoryFolder.add(editorTailParams, 'wagAmplitude', ...tailParamRanges.wagAmplitude!).name('Wag (crazy when home)').onChange(() => updateTailFromGUI())
+  memoryFolder.add(editorTailParams, 'relaxedCurve', ...tailParamRanges.relaxedCurve!).name('Curve (relaxed circle)').onChange(() => updateTailFromGUI())
+  memoryFolder.add(editorTailParams, 'tailThickness', ...tailParamRanges.tailThickness!).name('Thickness (strong)').onChange(() => updateTailFromGUI())
+  memoryFolder.add(editorTailParams, 'taperRatio', ...tailParamRanges.taperRatio!).name('Taper (thinner at tip)').onChange(() => updateTailFromGUI())
+  memoryFolder.open()
+
+  // Fur Parameters
+  const furFolder = gui.addFolder('Fur')
+  furFolder.add(editorTailParams, 'furEnabled').name('Enable Fur').onChange(() => updateTailFromGUI())
+  furFolder.add(editorTailParams, 'furLength', ...tailParamRanges.furLength!).name('Fur Length').onChange(() => updateTailFromGUI())
+  furFolder.add(editorTailParams, 'furDensity', ...tailParamRanges.furDensity!).name('Fur Density').onChange(() => updateTailFromGUI())
+  furFolder.addColor(editorTailParams, 'furColor').name('Fur Color 1').onChange(() => updateTailFromGUI())
+  furFolder.addColor(editorTailParams, 'furColor2').name('Fur Color 2').onChange(() => updateTailFromGUI())
+  furFolder.add(editorTailParams, 'furColorMix', ...tailParamRanges.furColorMix!).name('Color Mix').onChange(() => updateTailFromGUI())
+  furFolder.open()
+
+  // Technical Parameters
+  const techFolder = gui.addFolder('Technical')
+  techFolder.add(editorTailParams, 'showJoints').name('Show Joints').onChange(() => updateTailFromGUI())
+  techFolder.add(editorTailParams, 'jointSize', ...tailParamRanges.jointSize!).name('Joint Size').onChange(() => updateTailFromGUI())
+  techFolder.add(editorTailParams, 'metallic', ...tailParamRanges.metallic!).name('Metallic').onChange(() => updateTailFromGUI())
+  techFolder.add(editorTailParams, 'roughness', ...tailParamRanges.roughness!).name('Roughness').onChange(() => updateTailFromGUI())
+  techFolder.add(editorTailParams, 'rotationY', ...tailParamRanges.rotationY!).name('Rotation Y').onChange(() => updateTailFromGUI())
+
+  // Randomize button
+  gui.add({ randomize: randomizeTail }, 'randomize').name('🎲 Randomize')
+}
+
+function updateTailFromGUI() {
+  // Don't reassign, just clamp in place
+  const clamped = clampTailParams(editorTailParams)
+  Object.assign(editorTailParams, clamped)
+  tailRenderer.update(editorTailParams)
+}
+
+function randomizeTail() {
+  editorTailParams.tailLength = Math.random() * 0.7 + 0.3
+  editorTailParams.wagAmplitude = Math.random()
+  editorTailParams.relaxedCurve = Math.random()
+  editorTailParams.tailThickness = Math.random() * 0.06 + 0.02
+  editorTailParams.taperRatio = Math.random() * 0.7 + 0.3
+  
+  gui?.controllersRecursive().forEach((c) => c.updateDisplay())
+  updateTailFromGUI()
 }
 
 /* ═══════════════════════════════════════════════════
    Navigation
    ═══════════════════════════════════════════════════ */
-function goToPage(target: number) {
-  const clamped = Math.max(0, Math.min(storyPages.length - 1, target))
-  if (clamped === pageIndex || isTransitioning) return
-
-  isTransitioning = true
-  hideText()
-
-  setTimeout(() => {
-    pageIndex = clamped
-
-    if (storyPages[pageIndex].random) {
-      randomPageParams = createRandomAppleParams()
-    }
-
-    renderPage()
-    isTransitioning = false
-  }, 340)
-}
-
-// Prev / Next buttons
 el.prevBtn.addEventListener('click', () => goToPage(pageIndex - 1))
 el.nextBtn.addEventListener('click', () => goToPage(pageIndex + 1))
 
-// Dot clicks
-dots.forEach((dot) => {
-  dot.addEventListener('click', () => {
-    const idx = Number(dot.dataset.index)
-    if (!isNaN(idx)) goToPage(idx)
-  })
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => goToPage(i))
 })
 
 // Keyboard
@@ -332,7 +300,7 @@ window.addEventListener(
 
     setTimeout(() => {
       wheelCooldown = false
-    }, 800)
+    }, 1200)
   },
   { passive: true },
 )
