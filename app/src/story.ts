@@ -1,4 +1,3 @@
-import { mergeParams } from './params'
 import type { StoryPage } from './types'
 
 export const storyPages: StoryPage[] = [
@@ -8,271 +7,170 @@ export const storyPages: StoryPage[] = [
     label: '00',
     title: 'Memory Tail\n记忆之尾',
     text: '',
-    imageUrl: 'png/story_00_meeting.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    imageUrl: 'png/plush_00_cover.png',
   },
 
-  /* ── 1  Meeting ── */
+  /* ── 1  Watching ── */
   {
-    id: 'meeting',
+    id: 'watching',
     label: '01',
-    title: 'The day we met\n我们相遇的那天',
-    text: '十年前，收容所里，它看着我。我蹲下来，它走过来，把头靠在我手上。就这样，我们成为了家人。\n\nTen years ago, at the shelter, it looked at me. I knelt down, it came over, and rested its head on my hand. Just like that, we became family.',
-    imageUrl: 'png/story_00_meeting.png',
-    params: mergeParams({
-      height: 0.95,
-      width: 1.05,
-      maxWidthHeight: 0.53,
-      bottomRadius: 0.22,
-      bottomDepth: 0.19,
-      topRadius: 0.3,
-      topDepth: 0.2,
-      cubicRatio: 0.5,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 1.1,
-    }),
+    title: 'Watching\n观察',
+    text: '我喜欢观察它。\n坐着的时候，站着的时候，睡着的时候。\n每个姿态都有含义，每个动作都是语言。\n我花了十年学会这门语言。\n\nI liked watching it.\nSitting, standing, sleeping.\nEvery posture had meaning, every movement was language.\nI spent ten years learning this language.',
+    imageUrl: 'png/plush_01_watching.png',
   },
 
-  /* ── 2  Everyday ── */
+  /* ── 2  Rhythm ── */
   {
-    id: 'everyday',
+    id: 'rhythm',
     label: '02',
-    title: 'Every day\n每一天',
-    text: '每天下班回家，还没开门，就能听到它在里面的声音。门一开，它就扑过来。这是我一天中最好的时刻。\n\nEvery day after work, before I even opened the door, I could hear it inside. The door opens, it rushes toward me. This was the best moment of my day.',
-    imageUrl: 'png/story_01_everyday.png',
-    params: mergeParams({
-      height: 0.95,
-      width: 1.05,
-      maxWidthHeight: 0.53,
-      bottomRadius: 0.22,
-      bottomDepth: 0.19,
-      topRadius: 0.3,
-      topDepth: 0.2,
-      cubicRatio: 0.5,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0.5,
-    }),
+    title: 'Rhythm\n节奏',
+    text: '它有自己的节奏。\n早上慢，下午快，晚上又慢下来。\n我能从声音判断它在做什么，\n从沉默判断它在想什么。\n\nIt had its own rhythm.\nSlow in the morning, fast in the afternoon, slow again at night.\nI could tell what it was doing from the sound,\nwhat it was thinking from the silence.',
+    imageUrl: 'png/plush_02_rhythm.png',
   },
 
-  /* ── 3  Companion ── */
+  /* ── 3  Expression ── */
   {
-    id: 'companion',
+    id: 'expression',
     label: '03',
-    title: 'You were always there\n你一直都在',
-    text: '我开心的时候，它陪我疯。我难过的时候，它就安静地坐在我脚边。不说话，但我知道它懂。\n\nWhen I was happy, it played with me. When I was sad, it sat quietly at my feet. No words, but I knew it understood.',
-    imageUrl: 'png/story_02_companion.png',
-    params: mergeParams({
-      height: 0.95,
-      width: 1.05,
-      maxWidthHeight: 0.53,
-      bottomRadius: 0.22,
-      bottomDepth: 0.19,
-      topRadius: 0.3,
-      topDepth: 0.2,
-      cubicRatio: 0.5,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0.8,
-    }),
+    title: 'Expression\n表达',
+    text: '它不会说话，但它会表达。\n兴奋、紧张、放松、期待——\n我不需要看它的眼睛，\n只需要看它的轮廓。\n\nIt couldn\'t speak, but it could express.\nExcitement, nervousness, relaxation, anticipation—\nI didn\'t need to look at its eyes,\njust its silhouette.',
+    imageUrl: 'png/plush_03_expression.png',
   },
 
-  /* ── 4  Last Day ── */
+  /* ── 4  The Last ── */
   {
-    id: 'lastday',
+    id: 'last',
     label: '04',
-    title: 'The last day\n最后一天',
-    text: '医生说它撑不过今晚了。我抱着它，它看着我，努力地动了一下。然后就安静了。\n\nThe doctor said it wouldn\'t make it through the night. I held it, it looked at me, tried to move once more. Then it was still.',
-    imageUrl: 'png/story_03_last_day.png',
-    params: mergeParams({
-      height: 0.95,
-      width: 1.05,
-      maxWidthHeight: 0.53,
-      bottomRadius: 0.22,
-      bottomDepth: 0.19,
-      topRadius: 0.3,
-      topDepth: 0.2,
-      cubicRatio: 0.5,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: 'The last\n最后',
+    text: '那天它很安静。\n轮廓几乎不动。\n但我知道它在说话。\n我听懂了。\n\nThat day it was very quiet.\nIts silhouette barely moved.\nBut I knew it was speaking.\nI understood.',
+    imageUrl: 'png/plush_04_last.png',
   },
 
-  /* ── 5  Silence ── */
+  /* ── 5  Empty ── */
   {
-    id: 'silence',
+    id: 'empty',
     label: '05',
-    title: 'Silence\n寂静',
-    text: '家里突然安静得可怕。空的狗盆，空的狗窝，空的一切。我这才意识到，它的存在有多响亮。\n\nThe house became terrifyingly quiet. Empty bowl, empty bed, empty everything. Only then did I realize how loud its presence had been.',
-    imageUrl: 'png/story_04_silence.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: '—',
+    text: '轮廓消失了。\n节奏停止了。\n语言失效了。\n\nThe silhouette disappeared.\nThe rhythm stopped.\nThe language failed.',
+    imageUrl: 'png/plush_05_empty.png',
   },
 
-  /* ── 6  Robot Dog ── */
+  /* ── 6  Adaptation ── */
   {
-    id: 'robotdog',
+    id: 'adaptation',
     label: '06',
-    title: 'A new companion\n新的陪伴',
-    text: '公司说，他们可以把它的记忆移植到机器狗里。我同意了。不是为了替代，只是还没准备好说再见。\n\nThe company said they could transfer its memory into a robot dog. I agreed. Not to replace it, just because I wasn\'t ready to say goodbye.',
-    imageUrl: 'png/story_05_robot_dog.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: 'Adaptation\n适应',
+    text: '人会适应任何事。\n包括失去。\n三个月后，我已经不会在下午三点看向窗边。\n不会在推门前停顿。\n不会期待任何轮廓。\n\nPeople adapt to anything.\nIncluding loss.\nThree months later, I no longer looked at the window at 3 PM.\nNo longer paused before opening the door.\nNo longer expected any silhouette.',
+    imageUrl: 'png/plush_06_adaptation.png',
   },
 
-  /* ── 7  Recognition ── */
+  /* ── 7  Package ── */
+  {
+    id: 'package',
+    label: '07',
+    title: 'A package\n包裹',
+    text: '门口有个包裹。\n很大，很重。\n附带一张卡片：\n"记忆转移完成。它会记得你。"\n\nA package at the door.\nLarge, heavy.\nWith a card:\n"Memory transfer complete. It will remember you."',
+    imageUrl: 'png/plush_07_package.png',
+  },
+
+  /* ── 8  Recognition ── */
   {
     id: 'recognition',
-    label: '07',
-    title: 'It remembers\n它记得',
-    text: '机器狗看到我，数据显示"记忆匹配"。它认出了我。但它只是站在那里，一动不动。\n\nThe robot dog saw me, data showed "memory match". It recognized me. But it just stood there, motionless.',
-    imageUrl: 'png/story_06_recognition.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    label: '08',
+    title: 'Recognition\n识别',
+    text: '我打开开关。\n它看着我，走过来。\n轮廓一模一样。\n但有什么不对。\n\nI turned it on.\nIt looked at me, came over.\nThe silhouette was identical.\nBut something was wrong.',
+    imageUrl: 'png/plush_08_recognition.png',
   },
 
-  /* ── 8  Missing (TURNING POINT) ── */
+  /* ── 9  Missing ── */
   {
     id: 'missing',
-    label: '08',
-    title: 'Something is missing\n缺少了什么',
-    text: '它记得我，但它不会表达。我伸出手，它没有反应。我突然意识到——它没有尾巴。那个曾经为我疯狂摇动的尾巴，不见了。\n\nIt remembered me, but couldn\'t express it. I reached out, no response. Then I realized — it has no tail. That tail that used to wag wildly for me, was gone.',
-    imageUrl: 'png/story_07_missing.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
-  },
-
-  /* ── 9  Memories ── */
-  {
-    id: 'memories',
     label: '09',
-    title: 'I remember now\n我现在想起来了',
-    text: '那条尾巴。它见到我时疯狂摇动，打翻过无数杯子。它难过时垂下来，扫过地板。它是它表达的全部方式。我怎么能忘记？\n\nThat tail. It wagged wildly when it saw me, knocked over countless cups. It drooped when sad, sweeping the floor. It was its entire way of expressing. How could I forget?',
-    imageUrl: 'png/story_08_memories.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: 'I see it now\n我看见了',
+    text: '它会在三点坐在窗边。\n会在我回来时迎接我。\n轮廓几乎完美。\n\n几乎。\n\n它没有尾巴。\n\nIt sits by the window at 3 PM.\nGreets me when I return.\nThe silhouette almost perfect.\n\nAlmost.\n\nIt has no tail.',
+    imageUrl: 'png/plush_09_missing.png',
   },
 
-  /* ── 10  Rebuilding ── */
+  /* ── 10  Design Shape Intro ── */
   {
-    id: 'rebuilding',
+    id: 'design_shape_intro',
     label: '10',
-    title: 'Rebuilding memory\n重建记忆',
-    text: '工程师说，我可以为它设计一条尾巴。我记得它的每一个细节——长度、弧度、摇动的方式。每个参数，都是一段记忆。\n\nThe engineer said I could design a tail for it. I remember every detail — length, curve, the way it wagged. Every parameter is a memory.',
-    imageUrl: 'png/story_09_rebuilding.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: 'Design the shape\n设计形状',
+    text: '系统提示：请设计尾巴模块。\n参数控制形状：\n长度、宽度、曲线、厚度...\n\n我开始调整。\n试图从记忆中重建那个轮廓。\n\nSystem prompt: Please design tail module.\nParameters control the shape:\nLength, width, curve, thickness...\n\nI began adjusting.\nTrying to rebuild that silhouette from memory.',
+    imageUrl: 'png/plush_10_design.png',
   },
 
-  /* ── 11  Reunion ── */
+  /* ── 11  Design Shape (Interactive) ── */
   {
-    id: 'reunion',
+    id: 'design_shape',
     label: '11',
-    title: 'The first wag\n第一次摇动',
-    text: '当我按下确认，机器狗的尾巴动了。不是机械的摆动，而是那个熟悉的节奏。它又回来了。\n\nWhen I pressed confirm, the robot dog\'s tail moved. Not a mechanical swing, but that familiar rhythm. It was back.',
-    imageUrl: 'png/story_10_reunion.png',
-    params: mergeParams({
-      height: 1.0,
-      width: 1.0,
-      maxWidthHeight: 0.55,
-      bottomRadius: 0.2,
-      bottomDepth: 0.1,
-      topRadius: 0.2,
-      topDepth: 0.1,
-      cubicRatio: 0.3,
-      leafEnabled: false,
-      biteEnabled: false,
-      rotationY: 0,
-    }),
+    title: '',
+    text: '',
+    imageUrl: '', // No background for interactive page
+    freeEdit: true,
   },
 
-  /* ── 12  Playground (free edit) ── */
+  /* ── 12  Awareness ── */
   {
-    id: 'playground',
+    id: 'awareness',
     label: '12',
-    title: 'Now it\'s yours\n现在它是你的了',
-    text: '这是你的记忆。你的尾巴。每一个参数，都是一种情感。创造它，重建它，让它成为独一无二的存在。\n\nThis is your memory. Your tail. Every parameter is an emotion. Create it, rebuild it, make it uniquely yours.',
-    imageUrl: 'png/story_10_reunion.png',
+    title: 'I never noticed\n我从未注意',
+    text: '十年里，我从未专门看过它的尾巴。\n但现在我意识到，\n我一直在看。\n\n那是它表达的核心。\n兴奋时的高度，紧张时的僵硬，\n放松时的弧度，期待时的颤动。\n\n我以为我在看它，\n其实我在读它的尾巴。\n\nIn ten years, I never specifically looked at its tail.\nBut now I realize,\nI was always watching it.\n\nThat was the core of its expression.\nThe height when excited, the stiffness when nervous,\nthe curve when relaxed, the tremor when anticipating.\n\nI thought I was watching it,\nbut I was reading its tail.',
+    imageUrl: 'png/plush_11_awareness.png',
+  },
+
+  /* ── 13  Not Enough ── */
+  {
+    id: 'notenough',
+    label: '13',
+    title: 'But it\'s not enough\n但这还不够',
+    text: '形状有了。\n我把尾巴安装上去。\n它看起来完整了。\n\n但它不会动。\n或者说，它动得不对。\n\n形状不是全部。\n它需要知道如何表达。\n\nThe shape is there.\nI installed the tail.\nIt looks complete.\n\nBut it doesn\'t move.\nOr rather, it moves wrong.\n\nShape is not everything.\nIt needs to know how to express.',
+    imageUrl: 'png/plush_12_notenough.png',
+  },
+
+  /* ── 14  Let Go ── */
+  {
+    id: 'letgo',
+    label: '14',
+    title: 'Let go\n放手',
+    text: '我想了很久。\n\n也许，我不应该复刻。\n那条尾巴属于它，属于那十年。\n而这只机器狗，需要它自己的语言。\n\n不是复制品，而是新的开始。\n不是回忆，而是创造。\n\nI thought for a long time.\n\nPerhaps I shouldn\'t replicate.\nThat tail belonged to it, to those ten years.\nAnd this robot dog needs its own language.\n\nNot a copy, but a new beginning.\nNot remembering, but creating.',
+    imageUrl: 'png/plush_13_letgo.png',
+  },
+
+  /* ── 15  New Language ── */
+  {
+    id: 'newlanguage',
+    label: '15',
+    title: 'A new language\n新的语言',
+    text: '现在，它需要学会表达。\n\n开心的时候，尾巴应该怎么动？\n悲伤的时候呢？\n紧张、放松、期待...\n\n这是一门新的语言。\n不是复刻，而是共同创造。\n\nNow, it needs to learn to express.\n\nWhen happy, how should the tail move?\nWhen sad?\nNervous, relaxed, anticipating...\n\nThis is a new language.\nNot replicating, but creating together.',
+    imageUrl: 'png/plush_14_newlanguage.png',
+  },
+
+  /* ── 16  Design Emotions Intro ── */
+  {
+    id: 'design_emotions_intro',
+    label: '16',
+    title: 'Teach it emotions\n教它情绪',
+    text: '现在轮到你了。\n\n为每种情绪设计尾巴的动作：\n开心时的角度和速度\n悲伤时的姿态\n紧张、放松、期待...\n\n每个参数都是一种表达。\n每种表达都是一种连接。\n\nNow it\'s your turn.\n\nDesign the tail\'s movement for each emotion:\nAngle and speed when happy\nPosture when sad\nNervous, relaxed, anticipating...\n\nEvery parameter is an expression.\nEvery expression is a connection.',
+    imageUrl: 'png/plush_15_emotions.png',
+  },
+
+  /* ── 17  Design Emotions (Interactive) ── */
+  {
+    id: 'design_emotions',
+    label: '17',
+    title: '',
+    text: '',
+    imageUrl: '', // No background for interactive page
     freeEdit: true,
+  },
+
+  /* ── 18  Ending ── */
+  {
+    id: 'ending',
+    label: '18',
+    title: 'Seeing each other\n互相看见',
+    text: '在它的眼中，我看见了自己。\n在我的眼中，它看见了自己。\n\n我们互相看见，互相理解。\n这就是新的语言。\n\nIn its eyes, I see myself.\nIn my eyes, it sees itself.\n\nWe see each other, we understand each other.\nThis is the new language.',
+    imageUrl: 'png/plush_ending.png',
   },
 ]

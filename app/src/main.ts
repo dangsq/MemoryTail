@@ -1,12 +1,9 @@
-import GUI from 'lil-gui'
 import './style.css'
-import * as THREE from 'three'
-import { AppleRenderer } from './appleRenderer'
-import { TailRenderer } from './tailRenderer'
+import { SceneRenderer } from './sceneRenderer'
 import { RobotDogRenderer } from './robotDogRenderer'
-import { mergeTailParams, tailParamRanges, clampTailParams } from './params'
 import { storyPages } from './story'
-import type { TailParams } from './types'
+import { CableDrivenTailRenderer, defaultTailConfig } from './cableDrivenTail'
+import { TailGUI } from './tailGUI'
 
 /* ═══════════════════════════════════════════════════
    DOM scaffold
@@ -88,16 +85,17 @@ const dots = Array.from(el.dotNav.querySelectorAll<HTMLButtonElement>('.dot'))
 /* ═══════════════════════════════════════════════════
    Renderer
    ═══════════════════════════════════════════════════ */
-const renderer = new AppleRenderer(el.canvasWrap)
-const robotDogRenderer = new RobotDogRenderer(renderer.scene)
-const tailRenderer = new TailRenderer(renderer.scene)
+const sceneRenderer = new SceneRenderer(el.canvasWrap)
+const robotDogRenderer = new RobotDogRenderer(sceneRenderer.scene)
+
+// Cable-driven tail renderer
+let cableTailRenderer: CableDrivenTailRenderer | null = null
+let tailGUI: TailGUI | null = null
 
 /* ═══════════════════════════════════════════════════
    State
    ═══════════════════════════════════════════════════ */
 let pageIndex = 0
-let gui: GUI | null = null
-let editorTailParams: TailParams = mergeTailParams()
 let isTransitioning = false
 
 /* ═══════════════════════════════════════════════════
@@ -162,39 +160,60 @@ function renderPage() {
   // Update text content
   el.title.textContent = page.title
   el.text.textContent = page.text
-
-  // Handle last page (free edit mode)
-  const isLastPage = pageIndex === storyPages.length - 1
   
-  if (isLastPage) {
+  // Hide empty elements (remove background/border styling)
+  if (!page.title || page.title.trim() === '') {
+    el.title.style.display = 'none'
+  } else {
+    el.title.style.display = 'block'
+  }
+  
+  if (!page.text || page.text.trim() === '') {
+    el.text.style.display = 'none'
+  } else {
+    el.text.style.display = 'block'
+  }
+
+  // Handle interactive pages (freeEdit mode)
+  const isFreeEditPage = page.freeEdit === true
+  
+  if (isFreeEditPage) {
     // Show canvas and GUI
     el.canvasWrap.classList.add('visible')
     el.guiHost.classList.add('visible')
     el.keyboardHint.style.display = 'none'
     
-    // Hide background image and text content
+    // Hide background image (but keep text content visible for instructions)
     el.bgImage.style.opacity = '0'
-    el.storyContent.style.display = 'none'
+    el.storyContent.style.display = 'flex'
     
     // Enable orbit controls
-    renderer.enableControls()
+    sceneRenderer.enableControls()
     
-    // Build GUI if not exists
-    if (!gui) {
-      buildGUI()
+    // Determine which page we're on
+    if (page.id === 'design_shape') {
+      // Page 11: Design shape with cable-driven tail
+      buildCableTailGUI()
+      robotDogRenderer.show()
+      
+      // Initialize cable tail if not exists
+      if (!cableTailRenderer) {
+        cableTailRenderer = new CableDrivenTailRenderer(sceneRenderer.scene, defaultTailConfig)
+        // Position tail at robot dog's attachment point
+        const attachPoint = robotDogRenderer.getTailAttachmentPoint()
+        cableTailRenderer.setPosition(attachPoint.x, attachPoint.y, attachPoint.z)
+      }
+      cableTailRenderer.setVisible(true)
+      
+    } else if (page.id === 'design_emotions') {
+      // Page 17: Design emotions (future implementation)
+      buildCableTailGUI()
+      robotDogRenderer.show()
+      if (cableTailRenderer) {
+        cableTailRenderer.setVisible(true)
+      }
     }
     
-    // Show tail instead of apple
-    renderer.scene.traverse((obj) => {
-      if (obj instanceof THREE.Mesh) {
-        obj.visible = false
-      }
-    })
-    
-    // Attach tail to robot dog
-    const attachPoint = robotDogRenderer.getTailAttachmentPoint()
-    tailRenderer.setAttachmentPoint(attachPoint)
-    tailRenderer.update(editorTailParams)
   } else {
     // Hide canvas and GUI
     el.canvasWrap.classList.remove('visible')
@@ -206,64 +225,40 @@ function renderPage() {
     el.storyContent.style.display = 'flex'
     
     // Disable orbit controls
-    renderer.disableControls()
+    sceneRenderer.disableControls()
+    
+    // Hide cable tail on non-interactive pages
+    if (cableTailRenderer) {
+      cableTailRenderer.setVisible(false)
+    }
   }
 }
 
 /* ═══════════════════════════════════════════════════
-   Build GUI for last page
+   Build GUI for cable-driven tail
    ═══════════════════════════════════════════════════ */
-function buildGUI() {
-  gui = new GUI({ container: el.guiHost, title: 'Tail Parameters' })
-
-  // Memory Parameters
-  const memoryFolder = gui.addFolder('Memory Parameters')
-  memoryFolder.add(editorTailParams, 'tailLength', ...tailParamRanges.tailLength!).name('Length (reaches my hand)').onChange(() => updateTailFromGUI())
-  memoryFolder.add(editorTailParams, 'wagAmplitude', ...tailParamRanges.wagAmplitude!).name('Wag (crazy when home)').onChange(() => updateTailFromGUI())
-  memoryFolder.add(editorTailParams, 'relaxedCurve', ...tailParamRanges.relaxedCurve!).name('Curve (relaxed circle)').onChange(() => updateTailFromGUI())
-  memoryFolder.add(editorTailParams, 'tailThickness', ...tailParamRanges.tailThickness!).name('Thickness (strong)').onChange(() => updateTailFromGUI())
-  memoryFolder.add(editorTailParams, 'taperRatio', ...tailParamRanges.taperRatio!).name('Taper (thinner at tip)').onChange(() => updateTailFromGUI())
-  memoryFolder.open()
-
-  // Fur Parameters
-  const furFolder = gui.addFolder('Fur')
-  furFolder.add(editorTailParams, 'furEnabled').name('Enable Fur').onChange(() => updateTailFromGUI())
-  furFolder.add(editorTailParams, 'furLength', ...tailParamRanges.furLength!).name('Fur Length').onChange(() => updateTailFromGUI())
-  furFolder.add(editorTailParams, 'furDensity', ...tailParamRanges.furDensity!).name('Fur Density').onChange(() => updateTailFromGUI())
-  furFolder.addColor(editorTailParams, 'furColor').name('Fur Color 1').onChange(() => updateTailFromGUI())
-  furFolder.addColor(editorTailParams, 'furColor2').name('Fur Color 2').onChange(() => updateTailFromGUI())
-  furFolder.add(editorTailParams, 'furColorMix', ...tailParamRanges.furColorMix!).name('Color Mix').onChange(() => updateTailFromGUI())
-  furFolder.open()
-
-  // Technical Parameters
-  const techFolder = gui.addFolder('Technical')
-  techFolder.add(editorTailParams, 'showJoints').name('Show Joints').onChange(() => updateTailFromGUI())
-  techFolder.add(editorTailParams, 'jointSize', ...tailParamRanges.jointSize!).name('Joint Size').onChange(() => updateTailFromGUI())
-  techFolder.add(editorTailParams, 'metallic', ...tailParamRanges.metallic!).name('Metallic').onChange(() => updateTailFromGUI())
-  techFolder.add(editorTailParams, 'roughness', ...tailParamRanges.roughness!).name('Roughness').onChange(() => updateTailFromGUI())
-  techFolder.add(editorTailParams, 'rotationY', ...tailParamRanges.rotationY!).name('Rotation Y').onChange(() => updateTailFromGUI())
-
-  // Randomize button
-  gui.add({ randomize: randomizeTail }, 'randomize').name('🎲 Randomize')
-}
-
-function updateTailFromGUI() {
-  // Don't reassign, just clamp in place
-  const clamped = clampTailParams(editorTailParams)
-  Object.assign(editorTailParams, clamped)
-  tailRenderer.update(editorTailParams)
-}
-
-function randomizeTail() {
-  editorTailParams.tailLength = Math.random() * 0.7 + 0.3
-  editorTailParams.wagAmplitude = Math.random()
-  editorTailParams.relaxedCurve = Math.random()
-  editorTailParams.tailThickness = Math.random() * 0.06 + 0.02
-  editorTailParams.taperRatio = Math.random() * 0.7 + 0.3
+function buildCableTailGUI() {
+  // Destroy old GUI if exists
+  if (tailGUI) {
+    tailGUI.dispose()
+    tailGUI = null
+  }
   
-  gui?.controllersRecursive().forEach((c) => c.updateDisplay())
-  updateTailFromGUI()
+  // Create cable tail renderer if not exists
+  if (!cableTailRenderer) {
+    cableTailRenderer = new CableDrivenTailRenderer(sceneRenderer.scene, defaultTailConfig)
+    const attachPoint = robotDogRenderer.getTailAttachmentPoint()
+    cableTailRenderer.setPosition(attachPoint.x, attachPoint.y, attachPoint.z)
+  }
+  
+  // Create new GUI
+  tailGUI = new TailGUI(cableTailRenderer, el.guiHost)
 }
+
+/* ═══════════════════════════════════════════════════
+   Build GUI for last page (old implementation - removed, using cable tail now)
+   ═══════════════════════════════════════════════════ */
+// Removed buildGUI() and related functions - now using buildCableTailGUI() instead
 
 /* ═══════════════════════════════════════════════════
    Navigation
