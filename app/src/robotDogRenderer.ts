@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { addOutlineToGroup } from './outlineUtils'
 
 export class RobotDogRenderer {
   private scene: THREE.Scene
@@ -40,6 +41,8 @@ export class RobotDogRenderer {
         model.position.set(0, 0, 0)
         
         this.dogGroup.add(model)
+
+        addOutlineToGroup(model)
         this.modelLoaded = true
         
         console.log('Model added to scene')
@@ -182,6 +185,8 @@ export class RobotDogRenderer {
 
     // Position the whole dog
     this.dogGroup.position.y = 0.46
+
+    addOutlineToGroup(this.dogGroup)
   }
 
   getTailAttachmentPoint(): THREE.Vector3 {

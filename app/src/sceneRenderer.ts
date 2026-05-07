@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { addOutlineToGroup } from './outlineUtils'
 
 /* ═══════════════════════════════════════════════════
    Scene Renderer — 毛绒玩具风格场景
@@ -125,42 +126,49 @@ export class SceneRenderer {
     // 🍰 蛋糕
     const cake = this.createCake()
     cake.position.set(-1.5, -0.35, 1.2)
-    cake.scale.setScalar(0.25)  // 放大
+    cake.scale.setScalar(0.5)
+    addOutlineToGroup(cake)
     this.stage.add(cake)
 
     // 🥧 派
     const pie = this.createPie()
     pie.position.set(1.8, -0.4, 0.5)
-    pie.scale.setScalar(0.22)  // 放大
+    pie.scale.setScalar(0.44)
+    addOutlineToGroup(pie)
     this.stage.add(pie)
 
     // 🍎 苹果
     const apple = this.createApple()
     apple.position.set(-1.2, -0.42, -1.5)
-    apple.scale.setScalar(0.18)  // 放大
+    apple.scale.setScalar(0.36)
+    addOutlineToGroup(apple)
     this.stage.add(apple)
 
     // 🍒 樱桃
     const cherry1 = this.createCherry()
     cherry1.position.set(1.5, -0.43, -1.2)
-    cherry1.scale.setScalar(0.15)  // 放大
+    cherry1.scale.setScalar(0.3)
+    addOutlineToGroup(cherry1)
     this.stage.add(cherry1)
 
     const cherry2 = this.createCherry()
     cherry2.position.set(1.7, -0.43, -1.0)
-    cherry2.scale.setScalar(0.15)  // 放大
+    cherry2.scale.setScalar(0.3)
+    addOutlineToGroup(cherry2)
     this.stage.add(cherry2)
 
     // 🍩 甜甜圈
     const donut = this.createDonut()
     donut.position.set(-1.8, -0.38, -0.5)
-    donut.scale.setScalar(0.22)  // 放大
+    donut.scale.setScalar(0.44)
+    addOutlineToGroup(donut)
     this.stage.add(donut)
 
     // 🧁 纸杯蛋糕
     const cupcake = this.createCupcake()
     cupcake.position.set(0.8, -0.4, 1.8)
-    cupcake.scale.setScalar(0.18)  // 放大
+    cupcake.scale.setScalar(0.36)
+    addOutlineToGroup(cupcake)
     this.stage.add(cupcake)
   }
 
