@@ -302,7 +302,7 @@ export class CableDrivenTailRenderer {
 
     // 创建轮廓线材质
     const outlineMaterial = new THREE.MeshBasicMaterial({
-      color: 0x000000,  // 黑色轮廓
+      color: 0x4A3020,
       side: THREE.BackSide,
     })
 
@@ -399,7 +399,7 @@ export class CableDrivenTailRenderer {
       32
     )
     const diskOutlineMaterial = new THREE.MeshBasicMaterial({
-      color: 0x000000,
+      color: 0x4A3020,
       side: THREE.BackSide,
     })
     const diskOutline = new THREE.Mesh(diskOutlineGeometry, diskOutlineMaterial)

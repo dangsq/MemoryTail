@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 
-export function addOutlineToMesh(mesh: THREE.Mesh, scaleFactor = 1.05): THREE.Mesh {
+export function addOutlineToMesh(mesh: THREE.Mesh, scaleFactor = 1.05, color: THREE.ColorRepresentation = 0x4A3020): THREE.Mesh {
   const outlineMaterial = new THREE.MeshBasicMaterial({
-    color: 0x000000,
+    color,
     side: THREE.BackSide,
   })
   const outline = new THREE.Mesh(mesh.geometry.clone(), outlineMaterial)
@@ -12,12 +12,12 @@ export function addOutlineToMesh(mesh: THREE.Mesh, scaleFactor = 1.05): THREE.Me
   return outline
 }
 
-export function addOutlineToGroup(group: THREE.Group, scaleFactor = 1.05): void {
+export function addOutlineToGroup(group: THREE.Group, scaleFactor = 1.05, color: THREE.ColorRepresentation = 0x4A3020): void {
   const meshes: THREE.Mesh[] = []
   group.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       meshes.push(child)
     }
   })
-  meshes.forEach((mesh) => addOutlineToMesh(mesh, scaleFactor))
+  meshes.forEach((mesh) => addOutlineToMesh(mesh, scaleFactor, color))
 }

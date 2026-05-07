@@ -49,7 +49,6 @@ export class TailGUI {
 
     const basicParams = {
       segmentCount: config.segmentCount,
-      skinEnabled: config.skinEnabled,
       furryEnabled: config.furryEnabled,
     }
 
@@ -57,12 +56,6 @@ export class TailGUI {
       .name('Segment Count')
       .onChange((value: number) => {
         this.tailRenderer.rebuild({ segmentCount: value })
-      })
-
-    basicFolder.add(basicParams, 'skinEnabled')
-      .name('Skin (Fur Cover)')
-      .onChange((value: boolean) => {
-        this.tailRenderer.rebuild({ skinEnabled: value })
       })
 
     basicFolder.add(basicParams, 'furryEnabled')

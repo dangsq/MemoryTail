@@ -7,21 +7,23 @@ import * as THREE from 'three'
  */
 
 export interface FurryTailConfig {
-  furDensity: number        // 毛发密度（每个链节的毛发数量）
-  furLength: number         // 毛发长度
-  furThickness: number      // 毛发粗细
-  furColor: THREE.Color     // 毛发颜色
-  furRoughness: number      // 粗糙度
-  furMetalness: number      // 金属度
+  furDensity: number
+  furLength: number
+  furThickness: number
+  furColor: THREE.Color
+  furColor2: THREE.Color
+  furRoughness: number
+  furMetalness: number
 }
 
 export const defaultFurryConfig: FurryTailConfig = {
-  furDensity: 500,          // 500 根/链节，超级密集
-  furLength: 0.025,         // 2.5cm
-  furThickness: 0.0008,     // 0.8mm
-  furColor: new THREE.Color('#FFD4A3'),  // 温暖的杏色/奶油色
-  furRoughness: 0.95,       // 非常粗糙
-  furMetalness: 0.0,        // 完全不反光
+  furDensity: 500,
+  furLength: 0.025,
+  furThickness: 0.0008,
+  furColor: new THREE.Color('#FFFFFF'),
+  furColor2: new THREE.Color('#000000'),
+  furRoughness: 0.95,
+  furMetalness: 0.0,
 }
 
 export class FurryTailRenderer {
@@ -37,6 +39,7 @@ export class FurryTailRenderer {
     localOffset: THREE.Vector3
     localRotation: THREE.Euler
     bendFactor: number
+    colorMix: number
   }> = []
 
   constructor(segmentCount: number, config: FurryTailConfig = defaultFurryConfig) {
@@ -54,77 +57,84 @@ export class FurryTailRenderer {
    */
   private initializeFurData(): void {
     this.furData = []
-    
+
     for (let seg = 0; seg < this.segmentCount; seg++) {
+      const sectorCount = 10
+      const sectors: number[] = []
+      for (let s = 0; s < sectorCount; s++) {
+        sectors.push(Math.random() < 0.3 ? 1 : 0)
+      }
+
       for (let f = 0; f < this.furPerSegment; f++) {
-        // 在圆盘表面随机分布
         const angle = Math.random() * Math.PI * 2
-        const radius = Math.random() * 0.018  // 增加到 1.8cm，更大的分布范围
-        
-        // Z 轴偏移：在链节的前后都分布毛发
-        const zOffset = (Math.random() - 0.5) * 0.015  // ±7.5mm，覆盖链节长度
-        
+        const radius = Math.random() * 0.018
+        const zOffset = (Math.random() - 0.5) * 0.015
+
         const localOffset = new THREE.Vector3(
           Math.cos(angle) * radius,
           Math.sin(angle) * radius,
-          zOffset  // 添加 Z 轴偏移
+          zOffset
         )
-        
-        // 毛发方向：从圆盘表面向外辐射，增加随机倾斜
-        const radialAngle = Math.atan2(localOffset.y, localOffset.x)
-        const tiltAngle = (Math.random() - 0.5) * 0.7  // 增加到 ±40度，非常蓬松
-        const tiltAngle2 = (Math.random() - 0.5) * 0.7
-        
+
+        const baseTilt = -Math.PI / 2
+        const randomTilt = (Math.random() - 0.5) * 0.5
+        const sidewaysTilt = (Math.random() - 0.5) * 0.3
+        const outwardTilt = Math.random() * 0.2
+
         const localRotation = new THREE.Euler(
-          tiltAngle,
-          tiltAngle2,
-          radialAngle
+          baseTilt + randomTilt,
+          sidewaysTilt,
+          outwardTilt
         )
-        
-        // 弯曲因子：毛发末端会随运动弯曲
-        const bendFactor = 0.2 + Math.random() * 0.5  // 0.2-0.7，更多变化
-        
+
+        const sectorIndex = Math.floor((angle / (Math.PI * 2)) * sectorCount) % sectorCount
+        const colorMix = sectors[sectorIndex]
+
+        const bendFactor = 0.2 + Math.random() * 0.5
+
         this.furData.push({
           segmentIndex: seg,
           localOffset,
           localRotation,
           bendFactor,
+          colorMix,
         })
       }
-      
-      // 在链节末端添加额外的毛发（红色区域）
+
       if (seg === this.segmentCount - 1) {
-        // 最后一个链节，添加更多末端毛发
         for (let f = 0; f < this.furPerSegment * 0.5; f++) {
           const angle = Math.random() * Math.PI * 2
-          const radius = Math.random() * 0.02  // 更大的半径
-          
-          // 集中在链节末端
-          const zOffset = 0.01 + Math.random() * 0.01  // 10-20mm，末端位置
-          
+          const radius = Math.random() * 0.02
+          const zOffset = 0.01 + Math.random() * 0.01
+
           const localOffset = new THREE.Vector3(
             Math.cos(angle) * radius,
             Math.sin(angle) * radius,
             zOffset
           )
-          
-          const radialAngle = Math.atan2(localOffset.y, localOffset.x)
-          const tiltAngle = (Math.random() - 0.5) * 0.8  // 更大的倾斜
-          const tiltAngle2 = (Math.random() - 0.5) * 0.8
-          
+
+          const baseTilt = -Math.PI / 2
+          const randomTilt = (Math.random() - 0.5) * 0.6
+          const sidewaysTilt = (Math.random() - 0.5) * 0.35
+          const outwardTilt = Math.random() * 0.25
+
           const localRotation = new THREE.Euler(
-            tiltAngle,
-            tiltAngle2,
-            radialAngle
+            baseTilt + randomTilt,
+            sidewaysTilt,
+            outwardTilt
           )
-          
+
+          const sectorIndex = Math.floor((angle / (Math.PI * 2)) * sectorCount) % sectorCount
+          const colorMix = sectors[sectorIndex]
+
           const bendFactor = 0.3 + Math.random() * 0.4
-          
+
           this.furData.push({
             segmentIndex: seg,
             localOffset,
             localRotation,
             bendFactor,
+            colorMix,
           })
         }
       }
@@ -135,44 +145,84 @@ export class FurryTailRenderer {
    * 创建毛发网格
    */
   private createFurMesh(): void {
-    // 创建单根毛发的几何体（圆锥形）
-    const furGeometry = new THREE.ConeGeometry(
-      this.config.furThickness,      // 底部半径
-      this.config.furLength,          // 高度
-      3,                              // 3个面（三角形截面，性能更好）
-      1                               // 1个高度段
+    const furGeometry = this.createCurvedFurGeometry(
+      this.config.furLength,
+      this.config.furThickness * 1.5,
+      this.config.furThickness * 0.1,
+      0.35
     )
-    
-    // 调整几何体，让底部在原点，顶部向上
-    furGeometry.translate(0, this.config.furLength / 2, 0)
-    
-    // 创建毛发材质
+
     const furMaterial = new THREE.MeshStandardMaterial({
-      color: this.config.furColor,
+      color: 0xFFFFFF,
       roughness: this.config.furRoughness,
       metalness: this.config.furMetalness,
       side: THREE.DoubleSide,
-      flatShading: true,  // 平面着色，更有毛发质感
+      flatShading: true,
     })
-    
-    // 创建实例化网格
+
     this.furMesh = new THREE.InstancedMesh(
       furGeometry,
       furMaterial,
       this.totalFurs
     )
-    
+
     this.furMesh.castShadow = true
     this.furMesh.receiveShadow = true
-    
-    // 初始化所有实例的变换矩阵
+
     const matrix = new THREE.Matrix4()
+    const color = new THREE.Color()
     for (let i = 0; i < this.totalFurs; i++) {
       matrix.identity()
       this.furMesh.setMatrixAt(i, matrix)
+
+      const mix = this.furData[i]?.colorMix ?? Math.random()
+      color.copy(this.config.furColor).lerp(this.config.furColor2, mix)
+      this.furMesh.setColorAt(i, color)
     }
-    
+
     this.furMesh.instanceMatrix.needsUpdate = true
+    if (this.furMesh.instanceColor) {
+      this.furMesh.instanceColor.needsUpdate = true
+    }
+  }
+
+  private createCurvedFurGeometry(
+    length: number, baseRadius: number, tipRadius: number, curlFactor: number
+  ): THREE.BufferGeometry {
+    const heightSegs = 6
+    const radialSegs = 3
+    const pos: number[] = []
+    const idx: number[] = []
+    const nrm: number[] = []
+
+    for (let i = 0; i <= heightSegs; i++) {
+      const t = i / heightSegs
+      const y = t * length
+      const curl = Math.sin(t * Math.PI * 0.5) * curlFactor * length
+      const r = baseRadius * (1 - t) + tipRadius * t
+
+      for (let j = 0; j <= radialSegs; j++) {
+        const a = (j / radialSegs) * Math.PI * 2
+        pos.push(curl + r * Math.cos(a), y, r * Math.sin(a))
+        nrm.push(Math.cos(a), 0, Math.sin(a))
+      }
+    }
+
+    for (let i = 0; i < heightSegs; i++) {
+      for (let j = 0; j < radialSegs; j++) {
+        const a = i * (radialSegs + 1) + j
+        const b = a + radialSegs + 1
+        const c = a + radialSegs + 2
+        const d = a + 1
+        idx.push(a, b, d, b, c, d)
+      }
+    }
+
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3))
+    g.setIndex(idx)
+    return g
   }
 
   /**
@@ -254,10 +304,19 @@ export class FurryTailRenderer {
     
     // 如果改变了颜色或材质属性，更新材质
     if (this.furMesh && this.furMesh.material instanceof THREE.MeshStandardMaterial) {
-      this.furMesh.material.color.copy(this.config.furColor)
       this.furMesh.material.roughness = this.config.furRoughness
       this.furMesh.material.metalness = this.config.furMetalness
       this.furMesh.material.needsUpdate = true
+
+      const color = new THREE.Color()
+      for (let i = 0; i < this.totalFurs; i++) {
+        const mix = this.furData[i]?.colorMix ?? 0.5
+        color.copy(this.config.furColor).lerp(this.config.furColor2, mix)
+        this.furMesh.setColorAt(i, color)
+      }
+      if (this.furMesh.instanceColor) {
+        this.furMesh.instanceColor.needsUpdate = true
+      }
     }
     
     // 如果改变了密度或长度，需要重新创建
