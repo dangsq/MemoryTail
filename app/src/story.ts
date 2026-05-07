@@ -15,7 +15,7 @@ export const storyPages: StoryPage[] = [
     id: 'watching',
     label: '01',
     title: 'Watching\n观察',
-    text: '我喜欢观察它。\n坐着的时候，站着的时候，睡着的时候。\n每个姿态都有含义，每个动作都是语言。\n我花了十年学会这门语言。\n\nI liked watching it.\nSitting, standing, sleeping.\nEvery posture had meaning, every movement was language.\nI spent ten years learning this language.',
+    text: '我喜欢观察它。\n每个姿态都有含义，每个动作都是语言。\n\nI liked watching it.\nEvery posture had meaning, every movement was language.',
     imageUrl: 'png/plush_01_watching.png',
   },
 
@@ -24,7 +24,7 @@ export const storyPages: StoryPage[] = [
     id: 'rhythm',
     label: '02',
     title: 'Rhythm\n节奏',
-    text: '它有自己的节奏。\n早上慢，下午快，晚上又慢下来。\n我能从声音判断它在做什么，\n从沉默判断它在想什么。\n\nIt had its own rhythm.\nSlow in the morning, fast in the afternoon, slow again at night.\nI could tell what it was doing from the sound,\nwhat it was thinking from the silence.',
+    text: '它有自己的节奏。\n我能从声音判断它在做什么。\n\nIt had its own rhythm.\nI could tell what it was doing from the sound.',
     imageUrl: 'png/plush_02_rhythm.png',
   },
 
@@ -33,7 +33,7 @@ export const storyPages: StoryPage[] = [
     id: 'expression',
     label: '03',
     title: 'Expression\n表达',
-    text: '它不会说话，但它会表达。\n兴奋、紧张、放松、期待——\n我不需要看它的眼睛，\n只需要看它的轮廓。\n\nIt couldn\'t speak, but it could express.\nExcitement, nervousness, relaxation, anticipation—\nI didn\'t need to look at its eyes,\njust its silhouette.',
+    text: '它不会说话，但它会表达。\n我只需要看它的身体。\n\nIt couldn\'t speak, but it could express.\nI just needed to watch its body.',
     imageUrl: 'png/plush_03_expression.png',
   },
 
@@ -42,7 +42,7 @@ export const storyPages: StoryPage[] = [
     id: 'last',
     label: '04',
     title: 'The last\n最后',
-    text: '那天它很安静。\n轮廓几乎不动。\n但我知道它在说话。\n我听懂了。\n\nThat day it was very quiet.\nIts silhouette barely moved.\nBut I knew it was speaking.\nI understood.',
+    text: '那天它很安静。\n但我知道它在说话。\n\nThat day it was very quiet.\nBut I knew it was speaking.',
     imageUrl: 'png/plush_04_last.png',
   },
 
@@ -51,7 +51,7 @@ export const storyPages: StoryPage[] = [
     id: 'empty',
     label: '05',
     title: '—',
-    text: '轮廓消失了。\n节奏停止了。\n语言失效了。\n\nThe silhouette disappeared.\nThe rhythm stopped.\nThe language failed.',
+    text: '轮廓消失了。\n\nThe silhouette disappeared.',
     imageUrl: 'png/plush_05_empty.png',
   },
 
@@ -60,7 +60,7 @@ export const storyPages: StoryPage[] = [
     id: 'adaptation',
     label: '06',
     title: 'Adaptation\n适应',
-    text: '人会适应任何事。\n包括失去。\n三个月后，我已经不会在下午三点看向窗边。\n不会在推门前停顿。\n不会期待任何轮廓。\n\nPeople adapt to anything.\nIncluding loss.\nThree months later, I no longer looked at the window at 3 PM.\nNo longer paused before opening the door.\nNo longer expected any silhouette.',
+    text: '人会适应任何事。\n三个月后，我不再期待任何轮廓。\n\nPeople adapt to anything.\nThree months later, I no longer expected any silhouette.',
     imageUrl: 'png/plush_06_adaptation.png',
   },
 
@@ -69,7 +69,7 @@ export const storyPages: StoryPage[] = [
     id: 'package',
     label: '07',
     title: 'A package\n包裹',
-    text: '门口有个包裹。\n很大，很重。\n附带一张卡片：\n"记忆转移完成。它会记得你。"\n\nA package at the door.\nLarge, heavy.\nWith a card:\n"Memory transfer complete. It will remember you."',
+    text: '门口有个包裹。\n"记忆转移完成。它会记得你。"\n\nA package at the door.\n"Memory transfer complete. It will remember you."',
     imageUrl: 'png/plush_07_package.png',
   },
 
@@ -78,7 +78,7 @@ export const storyPages: StoryPage[] = [
     id: 'recognition',
     label: '08',
     title: 'Recognition\n识别',
-    text: '我打开开关。\n它看着我，走过来。\n轮廓一模一样。\n但有什么不对。\n\nI turned it on.\nIt looked at me, came over.\nThe silhouette was identical.\nBut something was wrong.',
+    text: '我打开开关。\n轮廓一模一样。但有什么不对。\n\nI turned it on.\nThe silhouette was identical. But something was wrong.',
     imageUrl: 'png/plush_08_recognition.png',
   },
 
@@ -87,7 +87,7 @@ export const storyPages: StoryPage[] = [
     id: 'missing',
     label: '09',
     title: 'I see it now\n我看见了',
-    text: '它会在三点坐在窗边。\n会在我回来时迎接我。\n轮廓几乎完美。\n\n几乎。\n\n它没有尾巴。\n\nIt sits by the window at 3 PM.\nGreets me when I return.\nThe silhouette almost perfect.\n\nAlmost.\n\nIt has no tail.',
+    text: '轮廓几乎完美。\n\n几乎。\n\n它没有尾巴。\n\nThe silhouette almost perfect.\n\nAlmost.\n\nIt has no tail.',
     imageUrl: 'png/plush_09_missing.png',
   },
 
@@ -96,7 +96,7 @@ export const storyPages: StoryPage[] = [
     id: 'design_shape_intro',
     label: '10',
     title: 'Design the shape\n设计形状',
-    text: '系统提示：请设计尾巴模块。\n参数控制形状：\n长度、宽度、曲线、厚度...\n\n我开始调整。\n试图从记忆中重建那个轮廓。\n\nSystem prompt: Please design tail module.\nParameters control the shape:\nLength, width, curve, thickness...\n\nI began adjusting.\nTrying to rebuild that silhouette from memory.',
+    text: '系统提示：请设计尾巴模块。\n我开始调整，试图重建那个轮廓。\n\nSystem prompt: Please design tail module.\nI began adjusting, trying to rebuild that silhouette.',
     imageUrl: 'png/plush_10_design.png',
   },
 
@@ -115,7 +115,7 @@ export const storyPages: StoryPage[] = [
     id: 'awareness',
     label: '12',
     title: 'I never noticed\n我从未注意',
-    text: '十年里，我从未专门看过它的尾巴。\n但现在我意识到，\n我一直在看。\n\n那是它表达的核心。\n兴奋时的高度，紧张时的僵硬，\n放松时的弧度，期待时的颤动。\n\n我以为我在看它，\n其实我在读它的尾巴。\n\nIn ten years, I never specifically looked at its tail.\nBut now I realize,\nI was always watching it.\n\nThat was the core of its expression.\nThe height when excited, the stiffness when nervous,\nthe curve when relaxed, the tremor when anticipating.\n\nI thought I was watching it,\nbut I was reading its tail.',
+    text: '十年里，我从未专门看过它的尾巴。\n但现在我意识到，那是它表达的核心。\n\nIn ten years, I never specifically looked at its tail.\nBut now I realize, that was the core of its expression.',
     imageUrl: 'png/plush_11_awareness.png',
   },
 
@@ -124,7 +124,7 @@ export const storyPages: StoryPage[] = [
     id: 'notenough',
     label: '13',
     title: 'But it\'s not enough\n但这还不够',
-    text: '形状有了。\n我把尾巴安装上去。\n它看起来完整了。\n\n但它不会动。\n或者说，它动得不对。\n\n形状不是全部。\n它需要知道如何表达。\n\nThe shape is there.\nI installed the tail.\nIt looks complete.\n\nBut it doesn\'t move.\nOr rather, it moves wrong.\n\nShape is not everything.\nIt needs to know how to express.',
+    text: '形状有了，但它不会动。\n形状不是全部。\n\nThe shape is there, but it doesn\'t move.\nShape is not everything.',
     imageUrl: 'png/plush_12_notenough.png',
   },
 
@@ -133,7 +133,7 @@ export const storyPages: StoryPage[] = [
     id: 'letgo',
     label: '14',
     title: 'Let go\n放手',
-    text: '我想了很久。\n\n也许，我不应该复刻。\n那条尾巴属于它，属于那十年。\n而这只机器狗，需要它自己的语言。\n\n不是复制品，而是新的开始。\n不是回忆，而是创造。\n\nI thought for a long time.\n\nPerhaps I shouldn\'t replicate.\nThat tail belonged to it, to those ten years.\nAnd this robot dog needs its own language.\n\nNot a copy, but a new beginning.\nNot remembering, but creating.',
+    text: '也许，我不应该复刻。\n这只机器狗，需要它自己的语言。\n\nPerhaps I shouldn\'t replicate.\nThis robot dog needs its own language.',
     imageUrl: 'png/plush_13_letgo.png',
   },
 
@@ -142,7 +142,7 @@ export const storyPages: StoryPage[] = [
     id: 'newlanguage',
     label: '15',
     title: 'A new language\n新的语言',
-    text: '现在，它需要学会表达。\n\n开心的时候，尾巴应该怎么动？\n悲伤的时候呢？\n紧张、放松、期待...\n\n这是一门新的语言。\n不是复刻，而是共同创造。\n\nNow, it needs to learn to express.\n\nWhen happy, how should the tail move?\nWhen sad?\nNervous, relaxed, anticipating...\n\nThis is a new language.\nNot replicating, but creating together.',
+    text: '现在，它需要学会表达。\n这是一门新的语言。\n\nNow, it needs to learn to express.\nThis is a new language.',
     imageUrl: 'png/plush_14_newlanguage.png',
   },
 
@@ -151,7 +151,7 @@ export const storyPages: StoryPage[] = [
     id: 'design_emotions_intro',
     label: '16',
     title: 'Teach it emotions\n教它情绪',
-    text: '现在轮到你了。\n\n为每种情绪设计尾巴的动作：\n开心时的角度和速度\n悲伤时的姿态\n紧张、放松、期待...\n\n每个参数都是一种表达。\n每种表达都是一种连接。\n\nNow it\'s your turn.\n\nDesign the tail\'s movement for each emotion:\nAngle and speed when happy\nPosture when sad\nNervous, relaxed, anticipating...\n\nEvery parameter is an expression.\nEvery expression is a connection.',
+    text: '现在轮到你了。\n我预设了几种情绪的动作。\n选择一个，看看它如何表达。\n\nNow it\'s your turn.\nI\'ve preset several emotional movements.\nChoose one and see how it expresses.',
     imageUrl: 'png/plush_15_emotions.png',
   },
 
@@ -170,7 +170,7 @@ export const storyPages: StoryPage[] = [
     id: 'ending',
     label: '18',
     title: 'Seeing each other\n互相看见',
-    text: '在它的眼中，我看见了自己。\n在我的眼中，它看见了自己。\n\n我们互相看见，互相理解。\n这就是新的语言。\n\nIn its eyes, I see myself.\nIn my eyes, it sees itself.\n\nWe see each other, we understand each other.\nThis is the new language.',
+    text: '我们互相看见，互相理解。\n这就是新的语言。\n\nWe see each other, we understand each other.\nThis is the new language.',
     imageUrl: 'png/plush_ending.png',
   },
 ]

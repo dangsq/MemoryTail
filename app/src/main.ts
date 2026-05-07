@@ -192,11 +192,10 @@ function renderPage() {
     
     // Determine which page we're on
     if (page.id === 'design_shape') {
-      // Page 11: Design shape with cable-driven tail
-      buildCableTailGUI()
+      // Page 12: Design shape (cable-driven tail with GUI)
+      buildCableTailGUI('shape')  // Shape 模式：只显示基础参数和半径参数
       robotDogRenderer.show()
       
-      // Initialize cable tail if not exists
       if (!cableTailRenderer) {
         cableTailRenderer = new CableDrivenTailRenderer(sceneRenderer.scene, defaultTailConfig)
         // Position tail at robot dog's attachment point
@@ -206,8 +205,8 @@ function renderPage() {
       cableTailRenderer.setVisible(true)
       
     } else if (page.id === 'design_emotions') {
-      // Page 17: Design emotions (future implementation)
-      buildCableTailGUI()
+      // Page 17: Design emotions - Animation 模式：只显示动画参数
+      buildCableTailGUI('animation')
       robotDogRenderer.show()
       if (cableTailRenderer) {
         cableTailRenderer.setVisible(true)
@@ -237,7 +236,7 @@ function renderPage() {
 /* ═══════════════════════════════════════════════════
    Build GUI for cable-driven tail
    ═══════════════════════════════════════════════════ */
-function buildCableTailGUI() {
+function buildCableTailGUI(mode: 'shape' | 'animation' = 'shape') {
   // Destroy old GUI if exists
   if (tailGUI) {
     tailGUI.dispose()
@@ -251,8 +250,8 @@ function buildCableTailGUI() {
     cableTailRenderer.setPosition(attachPoint.x, attachPoint.y, attachPoint.z)
   }
   
-  // Create new GUI
-  tailGUI = new TailGUI(cableTailRenderer, el.guiHost)
+  // Create new GUI with specified mode
+  tailGUI = new TailGUI(cableTailRenderer, el.guiHost, mode)
 }
 
 /* ═══════════════════════════════════════════════════
@@ -299,6 +298,55 @@ window.addEventListener(
   },
   { passive: true },
 )
+
+/* ═══════════════════════════════════════════════════
+   Mouse tracking for IK animation
+   ═══════════════════════════════════════════════════ */
+import * as THREE from 'three'
+
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+
+window.addEventListener('mousemove', (e) => {
+  // 只在 3D 页面且鼠标模式下处理
+  if (!cableTailRenderer) return
+  
+  const ikController = cableTailRenderer.getIKController()
+  if (!ikController) return
+  
+  const ikConfig = ikController.getConfig()
+  if (!ikConfig.enabled || ikConfig.mode !== 'mouse') return
+  
+  // 转换鼠标坐标到 NDC (-1 到 +1)
+  const canvas = el.canvasWrap.querySelector('canvas')
+  if (!canvas) return
+  
+  const rect = canvas.getBoundingClientRect()
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+  
+  // 使用 raycaster 将 2D 鼠标位置投射到 3D 空间
+  // 创建一个虚拟平面来接收射线
+  const camera = sceneRenderer.getCamera()
+  raycaster.setFromCamera(mouse, camera)
+  
+  // 创建一个垂直于相机的平面，距离相机一定距离
+  const planeNormal = new THREE.Vector3(0, 0, 1)
+  const plane = new THREE.Plane(planeNormal, 0)
+  
+  const intersectPoint = new THREE.Vector3()
+  raycaster.ray.intersectPlane(plane, intersectPoint)
+  
+  if (intersectPoint) {
+    // 限制目标位置在合理范围内
+    const maxDistance = 0.3
+    intersectPoint.x = Math.max(-maxDistance, Math.min(maxDistance, intersectPoint.x))
+    intersectPoint.y = Math.max(-maxDistance, Math.min(maxDistance, intersectPoint.y))
+    intersectPoint.z = Math.max(-maxDistance, Math.min(0, intersectPoint.z))
+    
+    ikController.setMouseTarget(intersectPoint)
+  }
+})
 
 /* ═══════════════════════════════════════════════════
    Initial render

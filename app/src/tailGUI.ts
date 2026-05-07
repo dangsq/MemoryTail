@@ -1,26 +1,46 @@
 import GUI from 'lil-gui'
 import type { CableDrivenTailRenderer } from './cableDrivenTail'
+import { animationPresets } from './tailIKAnimation'
 
 /**
- * 尾巴控制 GUI
+ * Tail GUI 控制面板
  * 
- * 提供用户界面来控制线驱动尾巴的参数
+ * 提供两种模式：
+ * - 'shape': 只显示基础参数和半径参数（用于 design_shape 页面）
+ * - 'animation': 只显示动画参数（用于 design_emotions 页面）
  */
 
 export class TailGUI {
   private gui: GUI
   private tailRenderer: CableDrivenTailRenderer
   private folders: Map<string, GUI> = new Map()
+  private mode: 'shape' | 'animation'
 
-  constructor(tailRenderer: CableDrivenTailRenderer, container?: HTMLElement) {
+  constructor(
+    tailRenderer: CableDrivenTailRenderer, 
+    container?: HTMLElement,
+    mode: 'shape' | 'animation' = 'shape'
+  ) {
     this.tailRenderer = tailRenderer
+    this.mode = mode
     this.gui = new GUI({ container })
-    this.gui.title('Tail Control')
+    this.gui.title(mode === 'shape' ? 'Tail Shape Control' : 'Tail Animation Control')
     
     this.buildGUI()
   }
 
   private buildGUI(): void {
+    if (this.mode === 'shape') {
+      // Shape 模式：只显示基础参数和半径参数
+      this.buildBasicControls()
+      this.buildScaleControls()
+    } else {
+      // Animation 模式：只显示动画参数
+      this.buildAnimationControls()
+    }
+  }
+
+  private buildBasicControls(): void {
     const config = this.tailRenderer.getConfig()
 
     // ========== 基础参数 ==========
@@ -29,137 +49,133 @@ export class TailGUI {
 
     const basicParams = {
       segmentCount: config.segmentCount,
-      maxJointAngle: config.maxJointAngle,
+      skinEnabled: config.skinEnabled,
+      furryEnabled: config.furryEnabled,
     }
 
-    basicFolder.add(basicParams, 'segmentCount', 3, 12, 1)
+    basicFolder.add(basicParams, 'segmentCount', 6, 30, 1)
       .name('Segment Count')
       .onChange((value: number) => {
         this.tailRenderer.rebuild({ segmentCount: value })
-        this.rebuildCableHoleControls()
       })
 
-    basicFolder.add(basicParams, 'maxJointAngle', 10, 60, 1)
-      .name('Max Joint Angle (°)')
-      .onChange((value: number) => {
-        this.tailRenderer.rebuild({ maxJointAngle: value })
+    basicFolder.add(basicParams, 'skinEnabled')
+      .name('Skin (Fur Cover)')
+      .onChange((value: boolean) => {
+        this.tailRenderer.rebuild({ skinEnabled: value })
+      })
+
+    basicFolder.add(basicParams, 'furryEnabled')
+      .name('Enable Furry')
+      .onChange((value: boolean) => {
+        this.tailRenderer.rebuild({ furryEnabled: value })
       })
 
     basicFolder.open()
-
-    // ========== 线孔控制 ==========
-    this.buildCableHoleControls()
-
-    // ========== 预设 ==========
-    this.buildPresets()
   }
 
-  private buildPresets(): void {
-    const presetFolder = this.gui.addFolder('Presets')
-    this.folders.set('presets', presetFolder)
+  private buildScaleControls(): void {
+    const scaleFolder = this.gui.addFolder('Disk Radius Multiplier')
+    this.folders.set('scale', scaleFolder)
 
-    const presetParams = {
-      loadPreset: 'straight',
-      resetAll: () => this.resetAllCables(),
+    const config = this.tailRenderer.getConfig()
+    const scaleParams = {
+      headScale: config.headScale,
+      midScale: config.midScale,
+      tailScale: config.tailScale,
     }
 
-    presetFolder.add(presetParams, 'loadPreset', ['straight', 'curved', 'spiral'])
-      .name('Load Preset')
-      .onChange((value: string) => {
-        this.loadPreset(value as 'straight' | 'curved' | 'spiral')
+    scaleFolder.add(scaleParams, 'headScale', 1.0, 3.0, 0.1)
+      .name('Head (× Base Radius)')
+      .onChange((value: number) => {
+        this.tailRenderer.rebuild({ headScale: value })
       })
 
-    presetFolder.add(presetParams, 'resetAll').name('Reset All Cables')
+    scaleFolder.add(scaleParams, 'midScale', 1.0, 3.0, 0.1)
+      .name('Mid (× Base Radius)')
+      .onChange((value: number) => {
+        this.tailRenderer.rebuild({ midScale: value })
+      })
 
-    presetFolder.open()
+    scaleFolder.add(scaleParams, 'tailScale', 1.0, 3.0, 0.1)
+      .name('Tail (× Base Radius)')
+      .onChange((value: number) => {
+        this.tailRenderer.rebuild({ tailScale: value })
+      })
+
+    scaleFolder.open()
   }
 
-  private buildCableHoleControls(): void {
-    // 移除旧的文件夹
-    if (this.folders.has('cables')) {
-      const oldFolder = this.folders.get('cables')!
-      oldFolder.destroy()
-      this.folders.delete('cables')
-    }
+  private buildAnimationControls(): void {
+    const animFolder = this.gui.addFolder('🎭 IK Animation')
+    this.folders.set('animation', animFolder)
 
-    const cableFolder = this.gui.addFolder('Cable Holes (12 holes)')
-    this.folders.set('cables', cableFolder)
-
-    const config = this.tailRenderer.getConfig()
-
-    // 为每个线孔创建控制
-    config.cableHoles.forEach((hole, index) => {
-      const holeFolder = cableFolder.addFolder(`Hole ${index} (${hole.angle}°)`)
+    const ikController = this.tailRenderer.getIKController()
+    if (!ikController) {
+      // IK 控制器还未初始化，显示提示信息
+      const loadingText = animFolder.add({ loading: 'Loading...' }, 'loading')
+      loadingText.disable()
       
-      const holeParams = {
-        enabled: hole.enabled,
-        tension: hole.tension,
-      }
-
-      holeFolder.add(holeParams, 'enabled')
-        .name('Enabled')
-        .onChange((value: boolean) => {
-          this.tailRenderer.toggleCableHole(index, value)
-        })
-
-      holeFolder.add(holeParams, 'tension', 0, 1, 0.01)
-        .name('Tension')
-        .onChange((value: number) => {
-          this.tailRenderer.setCableTension(index, value)
-        })
-
-      // 默认折叠
-      if (!hole.enabled) {
-        holeFolder.close()
-      }
-    })
-
-    cableFolder.open()
-  }
-
-  private rebuildCableHoleControls(): void {
-    this.buildCableHoleControls()
-  }
-
-  private loadPreset(preset: 'straight' | 'curved' | 'spiral'): void {
-    const config = this.tailRenderer.getConfig()
-    
-    switch (preset) {
-      case 'straight':
-        config.cableHoles.forEach(hole => {
-          hole.enabled = false
-          hole.tension = 0
-        })
-        break
-
-      case 'curved':
-        config.cableHoles.forEach((hole, i) => {
-          hole.enabled = i === 0
-          hole.tension = i === 0 ? 0.5 : 0
-        })
-        break
-
-      case 'spiral':
-        config.cableHoles.forEach((hole, i) => {
-          const isActive = i === 0 || i === 3 || i === 6 || i === 9
-          hole.enabled = isActive
-          hole.tension = isActive ? 0.3 : 0
-        })
-        break
+      // 延迟重试
+      setTimeout(() => {
+        this.rebuildAnimationControls()
+      }, 1000)
+      
+      animFolder.open()
+      return
     }
 
-    this.tailRenderer.updateCableHoles(config.cableHoles)
-    this.rebuildCableHoleControls()
+    const ikConfig = ikController.getConfig()
+
+    // 直接使用 ikConfig 对象，而不是创建副本
+    // 这样 GUI 的改变会直接反映到配置中
+    const animParams = ikConfig
+
+    animFolder.add(animParams, 'enabled')
+      .name('Enable Animation')
+      .onChange((value: boolean) => {
+        ikController.setEnabled(value)
+      })
+
+    // 模式选择
+    animFolder.add(animParams, 'mode', ['preset', 'mouse'])
+      .name('Mode')
+      .onChange((value: string) => {
+        ikController.setMode(value as 'preset' | 'mouse')
+        // 重建 GUI 以显示/隐藏相关控制
+        this.rebuildAnimationControls()
+      })
+
+    // 根据模式显示不同的控制
+    if (ikConfig.mode === 'preset') {
+      // 预设模式：显示预设选择
+      const presetNames = Object.keys(animationPresets)
+      
+      animFolder.add(animParams, 'currentPreset', presetNames)
+        .name('Preset')
+        .onChange((value: string) => {
+          console.log('GUI: Preset changed to:', value)
+          ikController.setPreset(value)
+        })
+    } else {
+      // 鼠标模式：显示提示
+      const mouseHint = animFolder.add({ hint: 'Move mouse to control tail' }, 'hint')
+      mouseHint.disable()
+    }
+
+    animFolder.open()
   }
 
-  private resetAllCables(): void {
-    const config = this.tailRenderer.getConfig()
-    config.cableHoles.forEach(hole => {
-      hole.enabled = false
-      hole.tension = 0
-    })
-    this.tailRenderer.updateCableHoles(config.cableHoles)
-    this.rebuildCableHoleControls()
+  private rebuildAnimationControls(): void {
+    // 移除旧的动画文件夹
+    if (this.folders.has('animation')) {
+      const oldFolder = this.folders.get('animation')!
+      oldFolder.destroy()
+      this.folders.delete('animation')
+    }
+    
+    // 重新构建
+    this.buildAnimationControls()
   }
 
   /**
